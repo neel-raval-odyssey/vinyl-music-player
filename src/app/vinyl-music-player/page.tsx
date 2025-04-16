@@ -1,6 +1,8 @@
 'use client';
 
 import Sidebar from '@/app/components/Sidebar';
+import VinylPlayer from '@/app/components/VinylPlayer';
+
 
 const VinylMusicPlayerPage: React.FC = () => {
   return (
@@ -12,10 +14,7 @@ const VinylMusicPlayerPage: React.FC = () => {
           🎶 Neelluus Vinyl Music Player
         </h1>
 
-        {/* Placeholder for VinylPlayer + Controls */}
-        <div className="w-full max-w-xl h-96 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center justify-center">
-          <p className="text-zinc-400">VinylPlayer coming soon 💿</p>
-        </div>
+        <VinylPlayer />
       </section>
     </main>
   );
