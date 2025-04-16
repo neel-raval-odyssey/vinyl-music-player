@@ -78,13 +78,14 @@ const VinylPlayer: React.FC = () => {
 
   return (
     <>
-    <div
+        <div
         ref={vinylRef}
         className={clsx(
-        'w-96 h-96 rounded-full border-8 border-zinc-800 relative',
-        'bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-xl overflow-hidden'
+            'w-96 h-96 rounded-full border-8 border-zinc-800 relative',
+            'bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-xl overflow-hidden',
+            isPlaying && 'animate-[vinyl-spin_60s_linear_infinite] will-change-transform'
         )}
-    >
+        >
         {/* Groove Rings */}
         <div className="absolute inset-0 rounded-full">
         {Array.from({ length: 40 }).map((_, i) => (

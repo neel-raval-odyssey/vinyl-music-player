@@ -120,3 +120,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes vinyl-spin {
+  0% {
+    transform: rotateZ(0deg);
+  }
+  100% {
+    transform: rotateZ(3600deg); /* 10 full rotations */
+  }
+}
