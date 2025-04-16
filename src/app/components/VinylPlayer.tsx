@@ -78,24 +78,40 @@ const VinylPlayer: React.FC = () => {
 
   return (
     <>
-      <div
+    <div
         ref={vinylRef}
         className={clsx(
-          'w-96 h-96 rounded-full border-8 border-zinc-800 relative',
-          'bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-xl'
+        'w-96 h-96 rounded-full border-8 border-zinc-800 relative',
+        'bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-xl overflow-hidden'
         )}
-      >
-        <Image
-          src={currentTrack.albumArt}
-          alt={currentTrack.title}
-          width={120}
-          height={120}
-          className="rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover"
-        />
-      </div>
+    >
+        {/* Groove Rings */}
+        <div className="absolute inset-0 rounded-full">
+        {Array.from({ length: 40 }).map((_, i) => (
+            <div
+            key={i}
+            className="absolute inset-0 rounded-full border border-white/20"
+            style={{
+                transform: `scale(${1 - i * 0.020})`,
+            }}
+            />
+        ))}
+        </div>
 
-      {/* Hidden audio element */}
-      <audio ref={audioRef} />
+        {/* Album Cover */}
+        <div
+        className="w-28 h-28 rounded-full overflow-hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+        >
+        <Image
+            src={currentTrack.albumArt}
+            alt={currentTrack.title}
+            fill
+            className="object-cover"
+        />
+        </div>
+    </div>
+
+    <audio ref={audioRef} />
     </>
   );
 };
