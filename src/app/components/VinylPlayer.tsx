@@ -2,15 +2,26 @@
 
 import { useEffect, useRef } from 'react';
 import { useStore } from '@/store/useStore';
-import { animate } from 'animejs';
 import Image from 'next/image';
 import clsx from 'clsx';
-import { motion } from 'framer-motion';
+import { motion, useAnimationControls } from 'framer-motion';
 
 const VinylPlayer: React.FC = () => {
   const { currentTrack, isPlaying, togglePlay } = useStore();
-  const vinylRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const vinylControls = useAnimationControls();
+
+  // Start vinyl spinning animation
+  const startVinylSpin = () => {
+    vinylControls.start({
+      rotate: 3600,
+      transition: {
+        duration: 60, // 60 seconds for 10 full rotations
+        ease: "linear",
+        repeat: Infinity,
+      }
+    });
+  };
 
   // Load and play audio when track changes
   useEffect(() => {
@@ -21,6 +32,8 @@ const VinylPlayer: React.FC = () => {
 
     const handleLoaded = () => {
       audio.play().catch((err) => console.error('Audio play error:', err));
+      // Start spinning immediately when a new track is loaded
+      startVinylSpin();
     };
 
     audio.addEventListener('loadeddata', handleLoaded);
@@ -36,29 +49,15 @@ const VinylPlayer: React.FC = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    isPlaying ? audio.play().catch(console.error) : audio.pause();
-  }, [isPlaying]);
-
-  // Optional: animejs fallback (can remove if using CSS spin)
-  useEffect(() => {
-    if (!vinylRef.current) return;
-
-    const rotateAnimation = animate(
-      vinylRef.current,
-      {
-        rotate: '360deg',
-        duration: 6000,
-        easing: 'linear',
-        loop: true,
-        autoplay: false,
-      }
-    );
-
-    isPlaying ? rotateAnimation.play() : rotateAnimation.pause();
-
-    return () => {
-      rotateAnimation.pause();
-    };
+    if (isPlaying) {
+      audio.play().catch(console.error);
+      // Resume vinyl rotation
+      startVinylSpin();
+    } else {
+      audio.pause();
+      // Pause vinyl rotation at current position
+      vinylControls.stop();
+    }
   }, [isPlaying]);
 
   if (!currentTrack) {
@@ -76,9 +75,6 @@ const VinylPlayer: React.FC = () => {
         className="absolute right-[-1.5rem] top-16 z-30 cursor-pointer"
         onClick={togglePlay}
       >
-        {/* Fixed hinge dot */}
-        {/* <div className="w-4 h-4 bg-white rounded-full absolute z-40" /> */}
-  
         {/* Rotating tonearm */}
         <motion.div
           className="w-40 h-2 bg-gray-300 rounded origin-right absolute top-1 right-2 z-30"
@@ -93,12 +89,11 @@ const VinylPlayer: React.FC = () => {
       </div>
   
       {/* Vinyl */}
-      <div
-        ref={vinylRef}
+      <motion.div
+        animate={vinylControls}
         className={clsx(
           'w-96 h-96 rounded-full border-8 border-zinc-800 relative',
-          'bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-xl overflow-hidden',
-          isPlaying && 'animate-[vinyl-spin_60s_linear_infinite] will-change-transform'
+          'bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-xl overflow-hidden'
         )}
       >
         {/* Groove Rings */}
@@ -121,13 +116,12 @@ const VinylPlayer: React.FC = () => {
             className="object-cover"
           />
         </div>
-      </div>
+      </motion.div>
   
       {/* Hidden Audio Element */}
       <audio ref={audioRef} />
     </div>
   );
-  
 };
 
 export default VinylPlayer;
