@@ -1,0 +1,42 @@
+export const tracks = [
+    {
+      id: '1',
+      title: '52 Bars',
+      artist: 'Karan Aujla',
+      albumArt: '/song-cover-photo/52-Bars.jpg',
+      audioSrc: '/audio-file/52-Bars.mp3',
+      duration: '3:41',
+    },
+    {
+      id: '2',
+      title: "Admirin' You",
+      artist: 'Karan Aujla 2',
+      albumArt: "/song-cover-photo/Admirin-You.jpg",
+      audioSrc: '/audio-file/Admirin-You.mp3',
+      duration: '3:30',
+    },
+    {
+      id: '3',
+      title: 'Softly',
+      artist: 'Karan Aujla 3',
+      albumArt: '/song-cover-photo/softly.jpg',
+      audioSrc: '/audio-file/Softly.mp3',
+      duration: '2:50',
+    },
+    {
+      id: '4',
+      title: 'Wavy',
+      artist: 'Karan Aujla 4',
+      albumArt: '/song-cover-photo/Wavy.jpg',
+      audioSrc: '/audio-file/Wavy.mp3',
+      duration: '2:40',
+    },
+    {
+      id: '5',
+      title: 'Winning Speech',
+      artist: 'Karan Aujla 5',
+      albumArt: '/song-cover-photo/Winning-Speech.jpg',
+      audioSrc: '/audio-file/Winning-Speech.mp3',
+      duration: '3:57',
+    },
+  ];
