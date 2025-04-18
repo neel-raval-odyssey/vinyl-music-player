@@ -1,15 +1,19 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '@/store/useStore';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { motion, useAnimationControls } from 'framer-motion';
+import { Button } from "@/components/ui/button"; // shadcn Button
+import { StepForward, StepBack, Shuffle } from "lucide-react"; // lucide icons
 
 const VinylPlayer: React.FC = () => {
   const { currentTrack, isPlaying, togglePlay } = useStore();
   const audioRef = useRef<HTMLAudioElement>(null);
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const vinylControls = useAnimationControls();
-  const [volume, setVolume] = useState(1); // Default to full
+  const [volume, setVolume] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
 
   // Start vinyl spinning
@@ -24,73 +28,60 @@ const VinylPlayer: React.FC = () => {
     });
   };
 
-  // Handle drag for volume control
   const handleDrag = (clientY: number) => {
-    if (!sliderContainerRef.current || !isDragging) return;
-    
-    const rect = sliderContainerRef.current.getBoundingClientRect();
-    const height = rect.height - 8; // Account for padding
-    const relativeY = Math.max(0, Math.min(height, clientY - rect.top));
-    
-    // Calculate volume (0 at bottom, 1 at top)
-    const newVolume = Math.max(0, Math.min(1, 1 - (relativeY / height)));
-    
-    setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-    }
-  };
-
-  // Handle click on the slider container
-  const handleSliderContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!sliderContainerRef.current) return;
-    
+
     const rect = sliderContainerRef.current.getBoundingClientRect();
-    const height = rect.height - 8; // Account for padding
-    const clickY = e.clientY - rect.top;
-    
-    // Calculate volume (0 at bottom, 1 at top)
-    const newVolume = Math.max(0, Math.min(1, 1 - (clickY / height)));
-    
+    const height = rect.height - 8;
+    const relativeY = Math.max(0, Math.min(height, clientY - rect.top));
+    const newVolume = Math.max(0, Math.min(1, 1 - (relativeY / height)));
+
     setVolume(newVolume);
     if (audioRef.current) {
       audioRef.current.volume = newVolume;
     }
   };
 
-  // Setup mouse/touch event listeners for dragging
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => handleDrag(e.clientY);
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches[0]) handleDrag(e.touches[0].clientY);
-    };
-    
-    const handleMouseUp = () => setIsDragging(false);
-    const handleTouchEnd = () => setIsDragging(false);
-    
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('touchmove', handleTouchMove, { passive: true });
-      document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchend', handleTouchEnd);
+  const handleClick = (clientY: number) => {
+    if (!sliderContainerRef.current) return;
+
+    const rect = sliderContainerRef.current.getBoundingClientRect();
+    const height = rect.height - 8;
+    const clickY = clientY - rect.top;
+    const newVolume = Math.max(0, Math.min(1, 1 - (clickY / height)));
+
+    setVolume(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
     }
-    
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => isDragging && handleDrag(e.clientY);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging && e.touches[0]) handleDrag(e.touches[0].clientY);
+    };
+    const stopDragging = () => setIsDragging(false);
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('mouseup', stopDragging);
+    document.addEventListener('touchend', stopDragging);
+
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('mouseup', stopDragging);
+      document.removeEventListener('touchend', stopDragging);
     };
   }, [isDragging]);
 
-  // Set volume on load
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
 
-  // Handle track change
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentTrack) return;
@@ -100,7 +91,7 @@ const VinylPlayer: React.FC = () => {
     const handleLoaded = () => {
       audio.play().catch(console.error);
       startVinylSpin();
-      audio.volume = volume; // ensure correct volume immediately
+      audio.volume = volume;
     };
 
     audio.addEventListener('loadeddata', handleLoaded);
@@ -111,7 +102,6 @@ const VinylPlayer: React.FC = () => {
     };
   }, [currentTrack]);
 
-  // Handle play/pause
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -133,9 +123,7 @@ const VinylPlayer: React.FC = () => {
     );
   }
 
-  // Calculate the visual fill height (minimum 4px to always be visible)
   const fillHeight = Math.max(4, volume * 100);
-  // Calculate the thumb position (minimum 2px from bottom to always be visible)
   const thumbPosition = Math.max(12, volume * 90);
 
   return (
@@ -181,39 +169,62 @@ const VinylPlayer: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Volume Control - Fixed container with proper overflow handling */}
+      {/* Buttons below the Vinyl */}
+      <div className="absolute bottom-36 flex flex-col items-center gap-3 justify-center z-30 -translate-x-80">
+        {/* Row 1: Previous + Next */}
+        <div className="flex gap-4">
+          <Button
+            variant="secondary"
+            className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner"
+          >
+            <span className="text-sm">Previous</span>
+            <StepBack className="w-5 h-5" />
+          </Button>
+
+          <Button
+            variant="secondary"
+            className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner"
+          >
+            <span className="text-sm">Next</span>
+            <StepForward className="w-5 h-5" />
+          </Button>
+        </div>
+
+        {/* Row 2: Shuffle */}
+        <Button
+          variant="secondary"
+          className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner w-full"
+        >
+          <span className="text-sm">Shuffle</span>
+          <Shuffle className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Volume Control */}
       <div className="absolute bottom-2 right-2 flex items-center justify-center z-30">
-        <div 
+        <div
           ref={sliderContainerRef}
           className="w-10 h-32 bg-gradient-to-b from-zinc-300 to-zinc-100 rounded-xl shadow-inner flex items-center justify-center p-1 cursor-pointer relative overflow-hidden"
-          onClick={handleSliderContainerClick}
           onMouseDown={(e) => {
             setIsDragging(true);
-            handleDrag(e.clientY);
+            handleClick(e.clientY);
           }}
           onTouchStart={(e) => {
             setIsDragging(true);
-            if (e.touches[0]) handleDrag(e.touches[0].clientY);
+            if (e.touches[0]) handleClick(e.touches[0].clientY);
           }}
         >
-          {/* Container outline for better visibility */}
           <div className="absolute inset-1 rounded-lg border border-gray-300 pointer-events-none" />
           
-          {/* Custom volume fill with minimum height */}
           <motion.div 
             className="absolute bottom-1 left-1 right-1 bg-black rounded-lg pointer-events-none"
-            initial={{ height: `${fillHeight}%` }}
             animate={{ height: `${fillHeight}%` }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            style={{ 
-              maxHeight: 'calc(100% - 8px)'
-            }}
+            style={{ maxHeight: 'calc(100% - 8px)' }}
           />
           
-          {/* Slider thumb with centered positioning */}
           <motion.div 
             className="absolute w-8 h-5 bg-gray-400 rounded-md shadow-lg border border-gray-500 pointer-events-none"
-            initial={{ bottom: `${thumbPosition}%` }}
             animate={{ bottom: `${thumbPosition}%` }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             style={{ 
