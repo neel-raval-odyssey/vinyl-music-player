@@ -1,7 +1,7 @@
 'use client';
 
-import Sidebar from '@/app/components/Sidebar';
-import VinylPlayer from '@/app/components/VinylPlayer';
+import Sidebar from '@/components/Sidebar';
+import VinylPlayer from '@/components/VinylPlayer';
 
 
 const VinylMusicPlayerPage: React.FC = () => {

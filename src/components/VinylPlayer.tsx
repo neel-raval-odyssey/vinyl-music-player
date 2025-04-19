@@ -1,20 +1,54 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useStore } from '@/store/useStore';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { motion, useAnimationControls } from 'framer-motion';
-import { Button } from "@/components/ui/button"; // shadcn Button
-import { StepForward, StepBack, Shuffle } from "lucide-react"; // lucide icons
+import { Button } from "@/components/ui/button";
+import { StepForward, StepBack, Shuffle } from "lucide-react";
 
 const VinylPlayer: React.FC = () => {
-  const { currentTrack, isPlaying, togglePlay } = useStore();
+  const { 
+    currentTrack, 
+    isPlaying, 
+    togglePlay, 
+    playNext, 
+    playPrevious, 
+    shuffleTrack,
+    tracks // Add this to check if tracks are loaded
+  } = useStore();
+  
   const audioRef = useRef<HTMLAudioElement>(null);
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const vinylControls = useAnimationControls();
   const [volume, setVolume] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
+  const [isAudioReady, setIsAudioReady] = useState(false);
+  const trackChangeRef = useRef(false);
+
+  // Debug logging
+  useEffect(() => {
+    console.log("Current tracks in store:", tracks);
+    console.log("Current track:", currentTrack);
+    console.log("Is playing:", isPlaying);
+  }, [tracks, currentTrack, isPlaying]);
+
+  // Enhanced button handlers with logging
+  const handlePlayNext = () => {
+    console.log("Next button clicked");
+    playNext();
+  };
+
+  const handlePlayPrevious = () => {
+    console.log("Previous button clicked");
+    playPrevious();
+  };
+
+  const handleShuffleTrack = () => {
+    console.log("Shuffle button clicked");
+    shuffleTrack();
+  };
 
   // Start vinyl spinning
   const startVinylSpin = () => {
@@ -26,6 +60,11 @@ const VinylPlayer: React.FC = () => {
         repeat: Infinity,
       },
     });
+  };
+
+  // Stop vinyl spinning
+  const stopVinylSpin = () => {
+    vinylControls.stop();
   };
 
   const handleDrag = (clientY: number) => {
@@ -56,6 +95,97 @@ const VinylPlayer: React.FC = () => {
     }
   };
 
+  // Safe play function that checks readiness
+  const safePlay = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio || !isAudioReady) return;
+    
+    try {
+      startVinylSpin();
+      await audio.play();
+    } catch (err) {
+      console.error('Error playing audio:', err);
+      stopVinylSpin();
+    }
+  }, [isAudioReady]);
+
+  // Safe pause function
+  const safePause = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    audio.pause();
+    stopVinylSpin();
+  }, []);
+
+  // Handle track changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentTrack) return;
+    
+    console.log("Track changed to:", currentTrack.title);
+    
+    // Mark that we're changing tracks
+    trackChangeRef.current = true;
+    setIsAudioReady(false);
+    
+    // Always pause first
+    audio.pause();
+    stopVinylSpin();
+    
+    // Set up event handlers before changing source
+    const handleCanPlay = () => {
+      console.log("Audio can play now");
+      setIsAudioReady(true);
+      audio.volume = volume;
+      trackChangeRef.current = false;
+    };
+    
+    const handleEnded = () => {
+      console.log("Track ended, playing next");
+      playNext();
+    };
+    
+    // Clean up old event listeners
+    audio.removeEventListener('canplay', handleCanPlay);
+    audio.removeEventListener('ended', handleEnded);
+    
+    // Add new event listeners
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('ended', handleEnded);
+    
+    // Change source and load
+    audio.src = currentTrack.audioSrc;
+    audio.load();
+    
+    return () => {
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [currentTrack, volume, playNext]);
+
+  // Handle play/pause state changes
+  useEffect(() => {
+    // Skip if we're in the middle of a track change
+    if (trackChangeRef.current) return;
+    
+    if (isPlaying) {
+      console.log("Play state activated");
+      safePlay();
+    } else {
+      console.log("Pause state activated");
+      safePause();
+    }
+  }, [isPlaying, safePlay, safePause]);
+
+  // When audio becomes ready, start playing if needed
+  useEffect(() => {
+    if (isAudioReady && isPlaying && !trackChangeRef.current) {
+      console.log("Audio ready and should play");
+      safePlay();
+    }
+  }, [isAudioReady, isPlaying, safePlay]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => isDragging && handleDrag(e.clientY);
     const handleTouchMove = (e: TouchEvent) => {
@@ -81,40 +211,14 @@ const VinylPlayer: React.FC = () => {
       audioRef.current.volume = volume;
     }
   }, [volume]);
-
+  
+  // Check if tracks array is empty
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentTrack) return;
-
-    audio.src = currentTrack.audioSrc;
-
-    const handleLoaded = () => {
-      audio.play().catch(console.error);
-      startVinylSpin();
-      audio.volume = volume;
-    };
-
-    audio.addEventListener('loadeddata', handleLoaded);
-    audio.load();
-
-    return () => {
-      audio.removeEventListener('loadeddata', handleLoaded);
-    };
-  }, [currentTrack]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.play().catch(console.error);
-      startVinylSpin();
-    } else {
-      audio.pause();
-      vinylControls.stop();
+    if (tracks.length === 0) {
+      console.warn("No tracks available in the store. Buttons won't work without tracks.");
     }
-  }, [isPlaying]);
-
+  }, [tracks]);
+  
   if (!currentTrack) {
     return (
       <div className="h-96 w-96 flex items-center justify-center text-zinc-500">
@@ -169,13 +273,21 @@ const VinylPlayer: React.FC = () => {
         </div>
       </motion.div>
 
+      {/* Track Info Display */}
+      <div className="absolute top-[-3rem] left-0 right-0 text-center">
+        <h3 className="text-lg font-bold">{currentTrack.title}</h3>
+        <p className="text-sm text-gray-500">{currentTrack.artist}</p>
+      </div>
+
       {/* Buttons below the Vinyl */}
       <div className="absolute bottom-36 flex flex-col items-center gap-3 justify-center z-30 -translate-x-80">
         {/* Row 1: Previous + Next */}
         <div className="flex gap-4">
           <Button
             variant="secondary"
+            onClick={handlePlayPrevious}
             className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner"
+            disabled={tracks.length <= 1}
           >
             <span className="text-sm">Previous</span>
             <StepBack className="w-5 h-5" />
@@ -183,7 +295,9 @@ const VinylPlayer: React.FC = () => {
 
           <Button
             variant="secondary"
+            onClick={handlePlayNext}
             className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner"
+            disabled={tracks.length <= 1}
           >
             <span className="text-sm">Next</span>
             <StepForward className="w-5 h-5" />
@@ -193,11 +307,18 @@ const VinylPlayer: React.FC = () => {
         {/* Row 2: Shuffle */}
         <Button
           variant="secondary"
+          onClick={handleShuffleTrack}
           className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner w-full"
+          disabled={tracks.length <= 1}
         >
           <span className="text-sm">Shuffle</span>
           <Shuffle className="w-5 h-5" />
         </Button>
+      </div>
+
+      {/* Debug info */}
+      <div className="absolute bottom-[-4rem] left-0 right-0 text-xs text-gray-500 text-center">
+        Tracks: {tracks.length} | Current: {currentTrack ? currentTrack.id : 'none'} | Playing: {isPlaying ? 'yes' : 'no'}
       </div>
 
       {/* Volume Control */}

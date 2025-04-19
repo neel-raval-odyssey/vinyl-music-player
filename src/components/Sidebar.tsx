@@ -4,9 +4,15 @@ import { tracks } from '@/lib/mockTracks';
 import { useStore } from '@/store/useStore';
 import Image from 'next/image';
 import clsx from 'clsx';
+import { useEffect } from 'react';
 
 const Sidebar: React.FC = () => {
-  const { currentTrack, setTrack } = useStore();
+  const { currentTrack, setTrack, setTracks } = useStore();
+
+  // Initialize tracks in the store when the component mounts
+  useEffect(() => {
+    setTracks(tracks);
+  }, [setTracks]);
 
   return (
     <aside className="w-64 h-full bg-zinc-900 text-white p-4 space-y-4 overflow-y-auto">
