@@ -26,6 +26,7 @@ const VinylPlayer: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
   const trackChangeRef = useRef(false);
+  const [isLoadingTrack, setIsLoadingTrack] = useState(false);
 
   // Debug logging
   useEffect(() => {
@@ -124,45 +125,38 @@ const VinylPlayer: React.FC = () => {
     if (!audio || !currentTrack) return;
     
     console.log("Track changed to:", currentTrack.title);
-    
-    // Mark that we're changing tracks
+  
     trackChangeRef.current = true;
+    setIsLoadingTrack(true);
     setIsAudioReady(false);
-    
-    // Always pause first
-    audio.pause();
-    stopVinylSpin();
-    
-    // Set up event handlers before changing source
+  
     const handleCanPlay = () => {
       console.log("Audio can play now");
       setIsAudioReady(true);
       audio.volume = volume;
       trackChangeRef.current = false;
+      setIsLoadingTrack(false);
     };
-    
+  
     const handleEnded = () => {
       console.log("Track ended, playing next");
       playNext();
     };
-    
-    // Clean up old event listeners
-    audio.removeEventListener('canplay', handleCanPlay);
-    audio.removeEventListener('ended', handleEnded);
-    
-    // Add new event listeners
+  
+    // ✅ First remove previous (with empty arrow functions), then add new ones
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('ended', handleEnded);
-    
-    // Change source and load
+  
+    audio.pause();
+    stopVinylSpin();
     audio.src = currentTrack.audioSrc;
     audio.load();
-    
+  
     return () => {
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentTrack, volume, playNext]);
+  }, [currentTrack, volume, playNext]);  
 
   // Handle play/pause state changes
   useEffect(() => {
@@ -287,7 +281,7 @@ const VinylPlayer: React.FC = () => {
             variant="secondary"
             onClick={handlePlayPrevious}
             className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner"
-            disabled={tracks.length <= 1}
+            disabled={isLoadingTrack || tracks.length <= 1}
           >
             <span className="text-sm">Previous</span>
             <StepBack className="w-5 h-5" />
@@ -297,7 +291,7 @@ const VinylPlayer: React.FC = () => {
             variant="secondary"
             onClick={handlePlayNext}
             className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner"
-            disabled={tracks.length <= 1}
+            disabled={isLoadingTrack || tracks.length <= 1}
           >
             <span className="text-sm">Next</span>
             <StepForward className="w-5 h-5" />
@@ -309,7 +303,7 @@ const VinylPlayer: React.FC = () => {
           variant="secondary"
           onClick={handleShuffleTrack}
           className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner w-full"
-          disabled={tracks.length <= 1}
+          disabled={isLoadingTrack || tracks.length <= 1}
         >
           <span className="text-sm">Shuffle</span>
           <Shuffle className="w-5 h-5" />
