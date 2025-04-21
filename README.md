@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎶 Neelluu's Vinyl Music Player
 
-## Getting Started
+A sleek, immersive vinyl-style music player built with **Next.js**, **Zustand**, **Framer Motion**, and **Tailwind CSS**. Spin tracks like it's analog, control playback with a tonearm, and vibe with a smooth, modern UI.
 
-First, run the development server:
+---
+
+## ✨ Features
+
+- 🎧 Vinyl-style rotating album art
+- 🎚️ Custom volume control with vertical drag/click
+- 📻 Play/pause via animated tonearm
+- ⏮️⏭️ Previous/Next and Shuffle controls
+- 📃 Zustand-based global player state
+- 🖼️ Dynamic album artwork + audio assets
+- 🎨 Framer Motion animations for realistic feel
+
+---
+
+## 📦 Tech Stack
+
+- [Next.js (App Router)](https://nextjs.org/)
+- [Zustand](https://zustand-demo.pmnd.rs/)
+- [Framer Motion](https://www.framer.com/motion/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Lucide Icons](https://lucide.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/neel-raval-odyssey/vinyl-music-player.git
+cd vinyl-music-player
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Start the development server
 
-## Learn More
+```bash
+pnpm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+App will be running on [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🗂️ Project Structure
 
-## Deploy on Vercel
+```
+src/
+├── app/
+│   ├── page.tsx                      # Redirects to the player
+│   └── vinyl-music-player/page.tsx  # Main player UI
+├── components/
+│   ├── Sidebar.tsx                   # Track list & selection
+│   └── VinylPlayer.tsx              # Core vinyl UI & logic
+├── store/
+│   └── useStore.ts                  # Zustand global player state
+├── lib/
+│   └── mockTracks.ts                # Track metadata (mocked)
+public/
+├── audio-file/                      # MP3 audio files
+└── song-cover-photo/               # Album artwork
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧑‍💻 Developer Notes
+
+- Volume control is implemented with vertical click/drag.
+- Audio playback and UI are controlled via Zustand state.
+- Track switching, playback, and shuffle behavior is abstracted into the global store.
+- Album art spins using Framer Motion’s animation controller.
+- Playback state is persistent within a session.
+
+---
+
+## 🌱 Add Your Own Tracks
+
+To add custom tracks:
+
+1. Drop your `.mp3` files into `/public/audio-file/`
+2. Drop corresponding `.jpg` covers into `/public/song-cover-photo/`
+3. Edit `src/lib/mockTracks.ts` and add your track object:
+```ts
+{
+  id: '6',
+  title: 'Your Track',
+  artist: 'Your Artist',
+  albumArt: '/song-cover-photo/Your-Cover.jpg',
+  audioSrc: '/audio-file/Your-Track.mp3',
+  duration: '3:45',
+}
+```
+
+---
+
+## 🧠 Ideas for Improvement
+
+- ✅ Seek bar / progress indicator
+- 🔁 Repeat modes
+- 🧵 Playlist/queue support
+- 🎙️ Lyrics display (LRC or synced AI)
+- 🔊 Output device selector
+- 🎛️ Sound visualization / waveform
+- 🤖 AI-based music mood recommendations
+---
+
+Made with ❤️ by Neel Raval – powered by open source & good music.
