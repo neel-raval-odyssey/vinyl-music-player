@@ -20,8 +20,8 @@ const Sidebar: React.FC = () => {
   }, [setTracks]);
 
   return (
-    <aside className="w-64 h-full bg-zinc-900 text-white p-4 space-y-4 overflow-y-auto">
-      <h2 className="text-xl font-semibold mb-4">🎵 Track List</h2>
+    <aside className="w-full h-48 overflow-y-auto md:w-64 md:h-full bg-zinc-900 text-white p-4 space-y-4">
+      <h2 className="text-lg sm:text-xl font-semibold mb-4">🎵 Track List</h2> {/* Responsive Text Size */}
 
       <ul className="space-y-2">
         {tracks.map((track) => (
@@ -43,8 +43,8 @@ const Sidebar: React.FC = () => {
               className="rounded-md object-cover"
             />
             <div>
-              <p className="text-sm font-medium">{track.title}</p>
-              <p className="text-xs text-zinc-400">{track.artist}</p>
+               <p className="text-xs sm:text-sm font-medium">{track.title}</p> {/* Responsive Text Size */}
+               <p className="text-[0.6rem] sm:text-xs text-zinc-400">{track.artist}</p> {/* Responsive Text Size */}
             </div>
           </li>
         ))}

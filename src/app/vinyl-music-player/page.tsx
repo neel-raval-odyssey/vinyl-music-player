@@ -9,13 +9,13 @@ import VinylPlayer from '@/components/VinylPlayer';
  */
 const VinylMusicPlayerPage: React.FC = () => {
   return (
-    <main className="h-screen w-full flex bg-zinc-950 text-white">
+    <main className="h-screen w-full flex flex-col md:flex-row bg-zinc-950 text-white">
       {/* Left Sidebar - Track list */}
       <Sidebar />
 
       {/* Main player section */}
-      <section className="flex-1 p-8 flex flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold mb-6">
+      <section className="flex-1 p-4 sm:p-8 flex flex-col items-center justify-center"> {/* Responsive Padding */}
+        <h1 className="text-3xl sm:text-4xl font-bold mb-6"> {/* Responsive Text Size */}
           🎶 Neelluus Vinyl Music Player
         </h1>
 

@@ -191,14 +191,14 @@ const VinylPlayer: React.FC = () => {
   const thumbPosition = Math.max(12, volume * 90);
 
   return (
-    <div className="relative w-[28rem] h-[28rem] flex items-center justify-center">
+    <div className="relative w-full max-w-[28rem] aspect-square flex items-center justify-center"> {/* Responsive Container */}
       {/* Tonearm (click to toggle play/pause) */}
       <div
-        className="absolute right-[-1.5rem] top-16 z-30 cursor-pointer"
+        className="absolute top-8 right-[-0.5rem] md:top-16 md:right-[-1.5rem] z-30 cursor-pointer" /* Responsive Position */
         onClick={togglePlay}
       >
         <motion.div
-          className="w-40 h-2 bg-gray-300 rounded origin-right absolute top-1 right-2 z-30"
+          className="w-24 md:w-40 h-2 bg-gray-300 rounded origin-right absolute top-1 right-2 z-30" /* Responsive Width */
           animate={{ rotate: isPlaying ? -38 : -80 }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
         >
@@ -210,7 +210,7 @@ const VinylPlayer: React.FC = () => {
       <motion.div
         animate={vinylControls}
         className={clsx(
-          'w-96 h-96 rounded-full border-8 border-zinc-800 relative',
+          'w-[85%] h-[85%] rounded-full border-8 border-zinc-800 relative', // Responsive Size
           'bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-xl overflow-hidden'
         )}
       >
@@ -223,7 +223,7 @@ const VinylPlayer: React.FC = () => {
             />
           ))}
         </div>
-        <div className="w-28 h-28 rounded-full overflow-hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+        <div className="w-[30%] h-[30%] rounded-full overflow-hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"> {/* Responsive Size */}
           <Image
             src={currentTrack.albumArt}
             alt={currentTrack.title}
@@ -235,30 +235,29 @@ const VinylPlayer: React.FC = () => {
 
       {/* Track title and artist */}
       <div className="absolute top-[-3rem] left-0 right-0 text-center">
-        <h3 className="text-lg font-bold">{currentTrack.title}</h3>
-        <p className="text-sm text-gray-500">{currentTrack.artist}</p>
+         <h3 className="text-base sm:text-lg font-bold">{currentTrack.title}</h3> {/* Responsive Text Size */}
+         <p className="text-xs sm:text-sm text-gray-500">{currentTrack.artist}</p> {/* Responsive Text Size */}
       </div>
 
       {/* Playback control buttons */}
-      <div className="absolute bottom-36 flex flex-col items-center gap-3 justify-center z-30 -translate-x-80">
+      <div className="absolute bottom-[-6rem] left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30 md:bottom-36 md:left-auto md:-translate-x-80"> {/* Responsive Position */}
         <div className="flex gap-4">
           <Button
             variant="secondary"
             onClick={playPrevious}
-            className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner"
+             className="flex items-center justify-between gap-2 px-3 py-2 text-xs sm:px-6 sm:py-3 sm:text-sm rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner" /* Responsive Padding & Text */
             disabled={isLoadingTrack || tracks.length <= 1}
           >
-            <span className="text-sm">Previous</span>
+             <span className="">Previous</span> {/* Text size controlled by Button className */}
             <StepBack className="w-5 h-5" />
           </Button>
-
           <Button
             variant="secondary"
             onClick={playNext}
-            className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner"
+             className="flex items-center justify-between gap-2 px-3 py-2 text-xs sm:px-6 sm:py-3 sm:text-sm rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner" /* Responsive Padding & Text */
             disabled={isLoadingTrack || tracks.length <= 1}
           >
-            <span className="text-sm">Next</span>
+             <span className="">Next</span> {/* Text size controlled by Button className */}
             <StepForward className="w-5 h-5" />
           </Button>
         </div>
@@ -266,16 +265,16 @@ const VinylPlayer: React.FC = () => {
         <Button
           variant="secondary"
           onClick={shuffleTrack}
-          className="flex items-center justify-between gap-2 px-6 py-3 rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner w-full"
+           className="flex items-center justify-between gap-2 px-3 py-2 text-xs sm:px-6 sm:py-3 sm:text-sm rounded-lg shadow-lg font-mono active:translate-y-1 active:shadow-inner w-full" /* Responsive Padding & Text */
           disabled={isLoadingTrack || tracks.length <= 1}
         >
-          <span className="text-sm">Shuffle</span>
+           <span className="">Shuffle</span> {/* Text size controlled by Button className */}
           <Shuffle className="w-5 h-5" />
         </Button>
       </div>
 
       {/* Volume slider UI */}
-      <div className="absolute bottom-2 right-2 flex items-center justify-center z-30">
+      <div className="absolute bottom-[-10rem] left-1/2 -translate-x-1/2 md:bottom-2 md:right-2 md:left-auto md:-translate-x-0 flex items-center justify-center z-30"> {/* Responsive Position */}
         <div
           ref={sliderContainerRef}
           className="w-10 h-32 bg-gradient-to-b from-zinc-300 to-zinc-100 rounded-xl shadow-inner flex items-center justify-center p-1 cursor-pointer relative overflow-hidden"
